@@ -125,14 +125,6 @@ export default function App() {
                   >
                     OpenRouter API Key
                   </a>
-                  <a
-                    href="https://replicate.com/account/api-tokens"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 rounded-md transition-colors"
-                  >
-                    Replicate API Token
-                  </a>
                 </div>
               </div>
             </div>

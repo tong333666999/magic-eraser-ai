@@ -11,17 +11,9 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
   const [provider, setProvider] = useState<APIProvider>(currentConfig.provider);
   const [geminiKey, setGeminiKey] = useState(currentConfig.provider === APIProvider.GEMINI ? currentConfig.apiKey : '');
   const [openrouterKey, setOpenrouterKey] = useState(currentConfig.provider === APIProvider.OPENROUTER ? currentConfig.apiKey : '');
-  const [replicateKey, setReplicateKey] = useState(currentConfig.provider === APIProvider.REPLICATE ? currentConfig.apiKey : '');
 
   const handleSave = () => {
-    let apiKey = '';
-    if (provider === APIProvider.GEMINI) {
-      apiKey = geminiKey;
-    } else if (provider === APIProvider.OPENROUTER) {
-      apiKey = openrouterKey;
-    } else if (provider === APIProvider.REPLICATE) {
-      apiKey = replicateKey;
-    }
+    const apiKey = provider === APIProvider.GEMINI ? geminiKey : openrouterKey;
 
     if (!apiKey.trim()) {
       alert('請輸入 API Key');
@@ -40,7 +32,6 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
     if (confirm('確定要清除 API Key 嗎？清除後需要重新輸入才能使用。')) {
       setGeminiKey('');
       setOpenrouterKey('');
-      setReplicateKey('');
       onConfigChange({
         provider: APIProvider.GEMINI,
         apiKey: ''
@@ -62,11 +53,7 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
           </svg>
           <span className="font-medium">API 設置</span>
           <span className="text-sm text-slate-400">
-            (當前: {
-              currentConfig.provider === APIProvider.GEMINI ? 'Gemini' :
-              currentConfig.provider === APIProvider.OPENROUTER ? 'OpenRouter' :
-              'Replicate'
-            })
+            (當前: {currentConfig.provider === APIProvider.GEMINI ? 'Gemini' : 'OpenRouter'})
           </span>
         </div>
         <svg
@@ -84,39 +71,28 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
           {/* Provider Selection */}
           <div>
             <label className="block text-sm font-medium mb-2">選擇 AI 提供商</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex gap-3">
               <button
                 onClick={() => setProvider(APIProvider.GEMINI)}
-                className={`py-2 px-3 rounded-lg border-2 transition-all ${
+                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
                   provider === APIProvider.GEMINI
                     ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
                     : 'border-slate-600 hover:border-slate-500'
                 }`}
               >
-                <div className="font-medium text-sm">Gemini</div>
+                <div className="font-medium">Gemini</div>
                 <div className="text-xs text-slate-400">Google AI</div>
               </button>
               <button
                 onClick={() => setProvider(APIProvider.OPENROUTER)}
-                className={`py-2 px-3 rounded-lg border-2 transition-all ${
+                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
                   provider === APIProvider.OPENROUTER
                     ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
                     : 'border-slate-600 hover:border-slate-500'
                 }`}
               >
-                <div className="font-medium text-sm">OpenRouter</div>
-                <div className="text-xs text-slate-400">多模型</div>
-              </button>
-              <button
-                onClick={() => setProvider(APIProvider.REPLICATE)}
-                className={`py-2 px-3 rounded-lg border-2 transition-all ${
-                  provider === APIProvider.REPLICATE
-                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
-                    : 'border-slate-600 hover:border-slate-500'
-                }`}
-              >
-                <div className="font-medium text-sm">Replicate</div>
-                <div className="text-xs text-slate-400">圖像修復 ⭐</div>
+                <div className="font-medium">OpenRouter</div>
+                <div className="text-xs text-slate-400">多模型支持</div>
               </button>
             </div>
           </div>
@@ -147,7 +123,7 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
                 你的 API Key 僅保存在瀏覽器本地，不會上傳到任何服務器
               </p>
               <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded text-xs text-amber-300">
-                ⚠️ 注意：Gemini 目前不支持圖片編輯功能，建議使用 <strong>Replicate</strong> 進行去浮水印
+                ⚠️ 注意：Gemini 目前不支持圖片編輯功能，僅能用於圖片分析
               </div>
             </div>
           )}
@@ -179,37 +155,6 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
               </p>
               <p className="mt-2 text-xs text-amber-400">
                 ⚠️ 注意：OpenRouter 的視覺模型目前僅支持圖片分析，暫不支持圖片編輯
-              </p>
-            </div>
-          )}
-
-          {/* Replicate API Key Input */}
-          {provider === APIProvider.REPLICATE && (
-            <div>
-              <label htmlFor="replicate-key" className="block text-sm font-medium mb-2">
-                Replicate API Token
-                <a
-                  href="https://replicate.com/account/api-tokens"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-2 text-xs text-indigo-400 hover:text-indigo-300"
-                >
-                  (獲取 API Token)
-                </a>
-              </label>
-              <input
-                id="replicate-key"
-                type="password"
-                value={replicateKey}
-                onChange={(e) => setReplicateKey(e.target.value)}
-                placeholder="輸入你的 Replicate API Token"
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-sm"
-              />
-              <p className="mt-1 text-xs text-slate-400">
-                你的 API Token 僅保存在瀏覽器本地，不會上傳到任何服務器
-              </p>
-              <p className="mt-2 text-xs text-emerald-400">
-                ✨ 使用 GFPGAN 模型進行圖像修復和增強
               </p>
             </div>
           )}

@@ -1,15 +1,24 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize Gemini Client
-// CRITICAL: Ensure process.env.API_KEY is available in your Cloudflare Pages environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 /**
  * Sends an image to Gemini to remove watermarks/text.
  * @param base64Image The base64 string of the image (without the data:image/xxx;base64, prefix if strictly raw, but the SDK handles data URIs mostly fine via inlineData helper or we strip it).
  * @param mimeType The mime type of the image.
+ * @param apiKey The Gemini API key (optional, falls back to environment variable)
  */
-export const removeWatermark = async (base64Image: string, mimeType: string): Promise<string> => {
+export const removeWatermark = async (
+  base64Image: string,
+  mimeType: string,
+  apiKey?: string
+): Promise<string> => {
+  // Use provided API key or fall back to environment variable
+  const key = apiKey || process.env.API_KEY;
+
+  if (!key) {
+    throw new Error("Gemini API key is required. Please provide it in the settings or set GEMINI_API_KEY environment variable.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: key });
   try {
     // 1. Prepare the Prompt
     // We use a specific prompt to guide the model to perform "inpainting" or "cleanup".

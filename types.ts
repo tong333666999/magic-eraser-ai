@@ -9,3 +9,14 @@ export interface ProcessedImage {
   original: string; // Base64 or URL
   processed: string; // Base64 or URL
 }
+
+export enum APIProvider {
+  GEMINI = 'GEMINI',
+  OPENROUTER = 'OPENROUTER'
+}
+
+export interface APIConfig {
+  provider: APIProvider;
+  apiKey: string;
+  model?: string;
+}

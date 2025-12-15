@@ -1,9 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ImageUploader } from './components/ImageUploader';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { ComparisonView } from './components/ComparisonView';
-import { removeWatermark } from './services/geminiService';
-import { AppState } from './types';
+import { APISettings } from './components/APISettings';
+import { removeWatermark } from './services/aiService';
+import { AppState, APIProvider, APIConfig } from './types';
+
+const API_CONFIG_KEY = 'ai-watermark-remover-api-config';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
@@ -11,6 +14,29 @@ export default function App() {
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // API Configuration
+  const [apiConfig, setApiConfig] = useState<APIConfig>(() => {
+    // Try to load from localStorage
+    const saved = localStorage.getItem(API_CONFIG_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // Fallback to default
+      }
+    }
+    // Default config - try to use environment variable
+    return {
+      provider: APIProvider.GEMINI,
+      apiKey: process.env.GEMINI_API_KEY || ''
+    };
+  });
+
+  // Save API config to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(API_CONFIG_KEY, JSON.stringify(apiConfig));
+  }, [apiConfig]);
 
   const handleImageSelected = useCallback(async (base64: string, type: string) => {
     setOriginalImage(base64);
@@ -22,17 +48,25 @@ export default function App() {
   const handleStartProcessing = async () => {
     if (!originalImage || !mimeType) return;
 
+    // Check if API key is configured
+    if (!apiConfig.apiKey) {
+      setAppState(AppState.ERROR);
+      setErrorMsg("請先在 API 設置中輸入你的 API Key");
+      return;
+    }
+
     setAppState(AppState.PROCESSING);
     setErrorMsg(null);
 
     try {
-      const resultBase64 = await removeWatermark(originalImage, mimeType);
+      const resultBase64 = await removeWatermark(originalImage, mimeType, apiConfig);
       setProcessedImage(resultBase64);
       setAppState(AppState.SUCCESS);
     } catch (err: any) {
       console.error(err);
       setAppState(AppState.ERROR);
-      setErrorMsg("處理失敗，請稍後再試。這可能是因為圖片過於複雜或API限制。");
+      const errorMessage = err?.message || "處理失敗，請稍後再試。";
+      setErrorMsg(errorMessage);
     }
   };
 
@@ -57,7 +91,13 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-3xl px-4 py-8 flex flex-col items-center justify-start gap-8">
-        
+
+        {/* API Settings */}
+        <APISettings
+          currentConfig={apiConfig}
+          onConfigChange={setApiConfig}
+        />
+
         {/* State: No Image Selected */}
         {!originalImage && (
           <div className="w-full animate-fade-in-up">

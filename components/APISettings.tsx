@@ -36,6 +36,19 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
     setIsExpanded(false);
   };
 
+  const handleClear = () => {
+    if (confirm('確定要清除 API Key 嗎？清除後需要重新輸入才能使用。')) {
+      setGeminiKey('');
+      setOpenrouterKey('');
+      setReplicateKey('');
+      onConfigChange({
+        provider: APIProvider.GEMINI,
+        apiKey: ''
+      });
+      setIsExpanded(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mb-6">
       <button
@@ -198,13 +211,41 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
             </div>
           )}
 
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors"
-          >
-            保存設置
-          </button>
+          {/* Privacy Notice */}
+          <div className="p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+            <div className="flex items-start gap-2">
+              <svg className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <div className="flex-1">
+                <h4 className="text-xs font-semibold text-slate-300 mb-1">隱私說明</h4>
+                <ul className="text-xs text-slate-400 space-y-1">
+                  <li>• API Key 僅保存在你的瀏覽器本地（localStorage）</li>
+                  <li>• 不會上傳到本網站的服務器</li>
+                  <li>• 直接從你的瀏覽器連接到 AI 提供商</li>
+                  <li>• 使用公共電腦時，請記得清除 API Key</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleSave}
+              className="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors"
+            >
+              保存設置
+            </button>
+            {currentConfig.apiKey && (
+              <button
+                onClick={handleClear}
+                className="py-2 px-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-medium transition-colors border border-red-600/30"
+              >
+                清除
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -98,11 +98,52 @@ export default function App() {
           onConfigChange={setApiConfig}
         />
 
+        {/* API Key Reminder */}
+        {!apiConfig.apiKey && (
+          <div className="w-full max-w-2xl p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="text-amber-400 text-xl">⚠️</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-amber-300 mb-1">需要 API Key 才能使用</h3>
+                <p className="text-sm text-slate-300 mb-2">
+                  請點擊上方「API 設置」輸入你的 API Key。你可以從以下平台免費獲取：
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
+                  >
+                    Gemini API Key
+                  </a>
+                  <a
+                    href="https://openrouter.ai/keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-md transition-colors"
+                  >
+                    OpenRouter API Key
+                  </a>
+                  <a
+                    href="https://replicate.com/account/api-tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 rounded-md transition-colors"
+                  >
+                    Replicate API Token
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* State: No Image Selected */}
         {!originalImage && (
           <div className="w-full animate-fade-in-up">
             <ImageUploader onImageSelected={handleImageSelected} />
-            
+
             {/* Features List */}
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">

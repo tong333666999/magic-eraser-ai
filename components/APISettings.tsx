@@ -6,14 +6,46 @@ interface APISettingsProps {
   currentConfig: APIConfig;
 }
 
+const PROVIDER_INFO: Record<APIProvider, { name: string; freeCredits: string; recommended?: boolean; note?: string }> = {
+  [APIProvider.PICWISH]: {
+    name: 'PicWish',
+    freeCredits: '50 免費 credits',
+    recommended: true,
+    note: '推薦：支援瀏覽器直接使用，免費額度最多'
+  },
+  [APIProvider.SEGMIND]: {
+    name: 'Segmind',
+    freeCredits: '註冊獲取額度',
+    note: '支援 CORS，適合瀏覽器使用'
+  },
+  [APIProvider.WATERMARKREMOVER]: {
+    name: 'WatermarkRemover',
+    freeCredits: '15GB + 45 credits',
+    note: '需要後端支援，不適合純前端應用'
+  },
+};
+
 export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, currentConfig }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [provider, setProvider] = useState<APIProvider>(currentConfig.provider);
-  const [geminiKey, setGeminiKey] = useState(currentConfig.provider === APIProvider.GEMINI ? currentConfig.apiKey : '');
-  const [openrouterKey, setOpenrouterKey] = useState(currentConfig.provider === APIProvider.OPENROUTER ? currentConfig.apiKey : '');
+  const [picwishKey, setPicwishKey] = useState(currentConfig.provider === APIProvider.PICWISH ? currentConfig.apiKey : '');
+  const [watermarkremoverKey, setWatermarkremoverKey] = useState(currentConfig.provider === APIProvider.WATERMARKREMOVER ? currentConfig.apiKey : '');
+  const [segmindKey, setSegmindKey] = useState(currentConfig.provider === APIProvider.SEGMIND ? currentConfig.apiKey : '');
 
   const handleSave = () => {
-    const apiKey = provider === APIProvider.GEMINI ? geminiKey : openrouterKey;
+    let apiKey = '';
+
+    switch (provider) {
+      case APIProvider.PICWISH:
+        apiKey = picwishKey;
+        break;
+      case APIProvider.WATERMARKREMOVER:
+        apiKey = watermarkremoverKey;
+        break;
+      case APIProvider.SEGMIND:
+        apiKey = segmindKey;
+        break;
+    }
 
     if (!apiKey.trim()) {
       alert('請輸入 API Key');
@@ -30,10 +62,11 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
 
   const handleClear = () => {
     if (confirm('確定要清除 API Key 嗎？清除後需要重新輸入才能使用。')) {
-      setGeminiKey('');
-      setOpenrouterKey('');
+      setPicwishKey('');
+      setWatermarkremoverKey('');
+      setSegmindKey('');
       onConfigChange({
-        provider: APIProvider.GEMINI,
+        provider: APIProvider.PICWISH,
         apiKey: ''
       });
       setIsExpanded(false);
@@ -53,7 +86,7 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
           </svg>
           <span className="font-medium">API 設置</span>
           <span className="text-sm text-slate-400">
-            (當前: {currentConfig.provider === APIProvider.GEMINI ? 'Gemini' : 'OpenRouter'})
+            (當前: {PROVIDER_INFO[currentConfig.provider].name})
           </span>
         </div>
         <svg
@@ -70,71 +103,95 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
         <div className="mt-2 p-4 bg-slate-800 rounded-lg space-y-4">
           {/* Provider Selection */}
           <div>
-            <label className="block text-sm font-medium mb-2">選擇 AI 提供商</label>
-            <div className="flex gap-3">
+            <label className="block text-sm font-medium mb-3">選擇 AI 提供商</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* PicWish - Recommended */}
               <button
-                onClick={() => setProvider(APIProvider.GEMINI)}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                  provider === APIProvider.GEMINI
+                onClick={() => setProvider(APIProvider.PICWISH)}
+                className={`relative py-3 px-4 rounded-lg border-2 transition-all text-left ${
+                  provider === APIProvider.PICWISH
                     ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
                     : 'border-slate-600 hover:border-slate-500'
                 }`}
               >
-                <div className="font-medium">Gemini</div>
-                <div className="text-xs text-slate-400">Google AI</div>
+                {PROVIDER_INFO[APIProvider.PICWISH].recommended && (
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    推薦
+                  </div>
+                )}
+                <div className="font-medium">{PROVIDER_INFO[APIProvider.PICWISH].name}</div>
+                <div className="text-xs text-slate-400 mt-1">{PROVIDER_INFO[APIProvider.PICWISH].freeCredits}</div>
+                <div className="text-xs text-slate-500 mt-1">{PROVIDER_INFO[APIProvider.PICWISH].note}</div>
               </button>
+
+              {/* Segmind */}
               <button
-                onClick={() => setProvider(APIProvider.OPENROUTER)}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                  provider === APIProvider.OPENROUTER
+                onClick={() => setProvider(APIProvider.SEGMIND)}
+                className={`py-3 px-4 rounded-lg border-2 transition-all text-left ${
+                  provider === APIProvider.SEGMIND
                     ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
                     : 'border-slate-600 hover:border-slate-500'
                 }`}
               >
-                <div className="font-medium">OpenRouter</div>
-                <div className="text-xs text-slate-400">多模型支持</div>
+                <div className="font-medium">{PROVIDER_INFO[APIProvider.SEGMIND].name}</div>
+                <div className="text-xs text-slate-400 mt-1">{PROVIDER_INFO[APIProvider.SEGMIND].freeCredits}</div>
+                <div className="text-xs text-slate-500 mt-1">{PROVIDER_INFO[APIProvider.SEGMIND].note}</div>
+              </button>
+
+              {/* WatermarkRemover - Not recommended for frontend */}
+              <button
+                onClick={() => setProvider(APIProvider.WATERMARKREMOVER)}
+                className={`py-3 px-4 rounded-lg border-2 transition-all text-left opacity-60 ${
+                  provider === APIProvider.WATERMARKREMOVER
+                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                    : 'border-slate-600 hover:border-slate-500'
+                }`}
+              >
+                <div className="font-medium">{PROVIDER_INFO[APIProvider.WATERMARKREMOVER].name}</div>
+                <div className="text-xs text-slate-400 mt-1">{PROVIDER_INFO[APIProvider.WATERMARKREMOVER].freeCredits}</div>
+                <div className="text-xs text-red-400 mt-1">{PROVIDER_INFO[APIProvider.WATERMARKREMOVER].note}</div>
               </button>
             </div>
           </div>
 
-          {/* Gemini API Key Input */}
-          {provider === APIProvider.GEMINI && (
+          {/* PicWish API Key Input */}
+          {provider === APIProvider.PICWISH && (
             <div>
-              <label htmlFor="gemini-key" className="block text-sm font-medium mb-2">
-                Gemini API Key
+              <label htmlFor="picwish-key" className="block text-sm font-medium mb-2">
+                PicWish API Key
                 <a
-                  href="https://aistudio.google.com/app/apikey"
+                  href="https://picwish.com/image-watermark-removal-api"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ml-2 text-xs text-indigo-400 hover:text-indigo-300"
                 >
-                  (獲取 API Key)
+                  (獲取 API Key - 免費 50 credits)
                 </a>
               </label>
               <input
-                id="gemini-key"
+                id="picwish-key"
                 type="password"
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder="輸入你的 Gemini API Key"
+                value={picwishKey}
+                onChange={(e) => setPicwishKey(e.target.value)}
+                placeholder="輸入你的 PicWish API Key"
                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-sm"
               />
               <p className="mt-1 text-xs text-slate-400">
                 你的 API Key 僅保存在瀏覽器本地，不會上傳到任何服務器
               </p>
-              <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded text-xs text-amber-300">
-                ⚠️ 注意：Gemini 目前不支持圖片編輯功能，僅能用於圖片分析
+              <div className="mt-2 p-2 bg-green-500/10 border border-green-500/30 rounded text-xs text-green-300">
+                ✅ 推薦：支援瀏覽器直接使用，註冊即贈送 50 個免費 credits
               </div>
             </div>
           )}
 
-          {/* OpenRouter API Key Input */}
-          {provider === APIProvider.OPENROUTER && (
+          {/* Segmind API Key Input */}
+          {provider === APIProvider.SEGMIND && (
             <div>
-              <label htmlFor="openrouter-key" className="block text-sm font-medium mb-2">
-                OpenRouter API Key
+              <label htmlFor="segmind-key" className="block text-sm font-medium mb-2">
+                Segmind API Key
                 <a
-                  href="https://openrouter.ai/keys"
+                  href="https://www.segmind.com/pixelflows/ai-watermark-remover/api"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ml-2 text-xs text-indigo-400 hover:text-indigo-300"
@@ -143,19 +200,50 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
                 </a>
               </label>
               <input
-                id="openrouter-key"
+                id="segmind-key"
                 type="password"
-                value={openrouterKey}
-                onChange={(e) => setOpenrouterKey(e.target.value)}
-                placeholder="輸入你的 OpenRouter API Key"
+                value={segmindKey}
+                onChange={(e) => setSegmindKey(e.target.value)}
+                placeholder="輸入你的 Segmind API Key"
                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-sm"
               />
               <p className="mt-1 text-xs text-slate-400">
                 你的 API Key 僅保存在瀏覽器本地，不會上傳到任何服務器
               </p>
-              <p className="mt-2 text-xs text-amber-400">
-                ⚠️ 注意：OpenRouter 的視覺模型目前僅支持圖片分析，暫不支持圖片編輯
+              <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-300">
+                ℹ️ Segmind 明確支援 CORS，適合瀏覽器使用。處理時間約 5-7 秒。
+              </div>
+            </div>
+          )}
+
+          {/* WatermarkRemover API Key Input */}
+          {provider === APIProvider.WATERMARKREMOVER && (
+            <div>
+              <label htmlFor="watermarkremover-key" className="block text-sm font-medium mb-2">
+                WatermarkRemover (PixelBin) API Key
+                <a
+                  href="https://pixelbin.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 text-xs text-indigo-400 hover:text-indigo-300"
+                >
+                  (獲取 API Key - 免費 15GB + 45 credits)
+                </a>
+              </label>
+              <input
+                id="watermarkremover-key"
+                type="password"
+                value={watermarkremoverKey}
+                onChange={(e) => setWatermarkremoverKey(e.target.value)}
+                placeholder="輸入你的 PixelBin API Key"
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-sm"
+              />
+              <p className="mt-1 text-xs text-slate-400">
+                你的 API Key 僅保存在瀏覽器本地，不會上傳到任何服務器
               </p>
+              <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-xs text-red-300">
+                ⚠️ 警告：PixelBin 需要後端伺服器生成 signed URL，不適合純前端應用。建議使用 PicWish 或 Segmind。
+              </div>
             </div>
           )}
 

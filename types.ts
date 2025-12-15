@@ -11,8 +11,9 @@ export interface ProcessedImage {
 }
 
 export enum APIProvider {
-  GEMINI = 'GEMINI',
-  OPENROUTER = 'OPENROUTER'
+  PICWISH = 'PICWISH',
+  SEGMIND = 'SEGMIND',
+  WATERMARKREMOVER = 'WATERMARKREMOVER'
 }
 
 export interface APIConfig {

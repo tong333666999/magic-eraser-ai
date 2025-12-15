@@ -28,7 +28,7 @@ export default function App() {
     }
     // Default config - user must enter their own API key
     return {
-      provider: APIProvider.GEMINI,
+      provider: APIProvider.PICWISH,
       apiKey: ''
     };
   });
@@ -105,25 +105,25 @@ export default function App() {
               <div className="text-amber-400 text-xl">⚠️</div>
               <div className="flex-1">
                 <h3 className="font-semibold text-amber-300 mb-1">需要 API Key 才能使用</h3>
-                <p className="text-sm text-slate-300 mb-2">
-                  請點擊上方「API 設置」輸入你的 API Key。你可以從以下平台免費獲取：
+                <p className="text-sm text-slate-300 mb-3">
+                  請點擊上方「API 設置」輸入你的 API Key。推薦使用以下平台（免費額度）：
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <a
-                    href="https://aistudio.google.com/app/apikey"
+                    href="https://picwish.com/image-watermark-removal-api"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-md transition-colors font-medium"
                   >
-                    Gemini API Key
+                    ✅ PicWish - 50 免費 credits（推薦）
                   </a>
                   <a
-                    href="https://openrouter.ai/keys"
+                    href="https://www.segmind.com/pixelflows/ai-watermark-remover/api"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-md transition-colors"
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
                   >
-                    OpenRouter API Key
+                    Segmind - 支援 CORS
                   </a>
                 </div>
               </div>

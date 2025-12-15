@@ -12,7 +12,8 @@ export interface ProcessedImage {
 
 export enum APIProvider {
   GEMINI = 'GEMINI',
-  OPENROUTER = 'OPENROUTER'
+  OPENROUTER = 'OPENROUTER',
+  REPLICATE = 'REPLICATE'
 }
 
 export interface APIConfig {

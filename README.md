@@ -6,6 +6,10 @@
 
 This contains everything you need to run your app locally.
 
+## Deploy to Cloudflare Pages
+
+This app is configured to automatically deploy to Cloudflare Pages on every push to the main branch.
+
 View your app in AI Studio: https://ai.studio/apps/drive/1IU7Ue-A_BDjyDCl-9AOCu9hhUrE0F70E
 
 ## Run Locally

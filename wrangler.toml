@@ -1,0 +1,5 @@
+name = "magic-eraser-ai"
+compatibility_date = "2025-12-15"
+
+[site]
+bucket = "./dist"

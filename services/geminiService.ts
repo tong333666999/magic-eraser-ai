@@ -19,54 +19,81 @@ export const removeWatermark = async (
   const ai = new GoogleGenAI({ apiKey });
   try {
     // 1. Prepare the Prompt
-    // We use a specific prompt to guide the model to perform "inpainting" or "cleanup".
-    const prompt = "Remove any watermarks, logos, text overlays, or date stamps from this image. Reconstruct the background seamlessly where the watermark was removed to make it look like the original photo. Return ONLY the processed image.";
+    const prompt = "You are an expert image editor. Remove any watermarks, logos, text overlays, or date stamps from this image. Reconstruct the background seamlessly where the watermark was removed. Return the edited image without any watermarks.";
 
     // 2. Prepare the Image Part
-    // The SDK expects raw base64 data for inlineData.
-    // If the input base64Image contains the prefix "data:image/...", we usually strip it.
-    const base64Data = base64Image.includes('base64,') 
-      ? base64Image.split('base64,')[1] 
+    const base64Data = base64Image.includes('base64,')
+      ? base64Image.split('base64,')[1]
       : base64Image;
 
-    // 3. Call the Model
-    // Using 'gemini-2.5-flash-image' as it is the current standard for general image editing tasks.
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [
-          {
-            text: prompt,
-          },
-          {
-            inlineData: {
-              mimeType: mimeType,
-              data: base64Data,
-            },
-          },
-        ],
-      },
-      // Config specific to image generation/editing if needed, 
-      // but mostly defaults work well for restoration.
-    });
+    // 3. Try different Gemini models that support image generation
+    // Note: Gemini's image editing capabilities are limited
+    const models = [
+      'gemini-2.0-flash-exp',
+      'gemini-exp-1206',
+      'gemini-2.0-flash-thinking-exp-1219'
+    ];
 
-    // 4. Extract the Image
-    // The response might contain text (if it failed or chatted) or an image.
-    // We iterate to find the inlineData.
-    if (response.candidates && response.candidates.length > 0) {
-      const parts = response.candidates[0].content.parts;
-      for (const part of parts) {
-        if (part.inlineData && part.inlineData.data) {
-          // Construct a usable data URI
-          return `data:image/png;base64,${part.inlineData.data}`;
+    let lastError: any = null;
+
+    for (const modelName of models) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: {
+            parts: [
+              {
+                text: prompt,
+              },
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data,
+                },
+              },
+            ],
+          },
+        });
+
+        // Check for image in response
+        if (response.candidates && response.candidates.length > 0) {
+          const parts = response.candidates[0].content.parts;
+
+          // Look for inline image data
+          for (const part of parts) {
+            if (part.inlineData && part.inlineData.data) {
+              return `data:image/png;base64,${part.inlineData.data}`;
+            }
+          }
+
+          // If no image, check if there's text explaining why
+          const textParts = parts.filter(p => p.text);
+          if (textParts.length > 0) {
+            const text = textParts.map(p => p.text).join('\n');
+            console.log('Model response:', text);
+          }
         }
+      } catch (error: any) {
+        console.error(`Model ${modelName} failed:`, error);
+        lastError = error;
+        continue; // Try next model
       }
     }
 
-    throw new Error("No image was returned by the AI. It might have refused the request or returned text only.");
+    // If we got here, no model returned an image
+    throw new Error(
+      "Gemini 目前不支持直接的圖片編輯功能。\n\n" +
+      "建議使用 Replicate 提供的 GFPGAN 模型進行圖像修復，" +
+      "或等待 Gemini 的圖片編輯功能正式推出。\n\n" +
+      "請在 API 設置中切換到 Replicate 提供商。"
+    );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    // Provide more helpful error messages
+    if (error.message && error.message.includes('not found')) {
+      throw new Error("Gemini 模型不可用。請檢查 API Key 或嘗試使用 Replicate。");
+    }
     throw error;
   }
 };

@@ -116,7 +116,7 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
                 }`}
               >
                 <div className="font-medium text-sm">Replicate</div>
-                <div className="text-xs text-slate-400">圖像修復</div>
+                <div className="text-xs text-slate-400">圖像修復 ⭐</div>
               </button>
             </div>
           </div>
@@ -146,6 +146,9 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
               <p className="mt-1 text-xs text-slate-400">
                 你的 API Key 僅保存在瀏覽器本地，不會上傳到任何服務器
               </p>
+              <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded text-xs text-amber-300">
+                ⚠️ 注意：Gemini 目前不支持圖片編輯功能，建議使用 <strong>Replicate</strong> 進行去浮水印
+              </div>
             </div>
           )}
 

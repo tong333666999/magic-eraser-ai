@@ -21,7 +21,14 @@ export default function App() {
     const saved = localStorage.getItem(API_CONFIG_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Check if the provider is still valid (not removed GEMINI/OPENROUTER)
+        const validProviders = Object.values(APIProvider);
+        if (validProviders.includes(parsed.provider)) {
+          return parsed;
+        }
+        // If provider is invalid, reset to default
+        console.log('Invalid provider in localStorage, resetting to PICWISH');
       } catch {
         // Fallback to default
       }

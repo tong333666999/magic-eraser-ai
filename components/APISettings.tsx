@@ -27,7 +27,14 @@ const PROVIDER_INFO: Record<APIProvider, { name: string; freeCredits: string; re
 
 export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, currentConfig }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [provider, setProvider] = useState<APIProvider>(currentConfig.provider);
+
+  // Ensure provider is valid, fallback to PICWISH if not
+  const validProviders = Object.values(APIProvider);
+  const safeProvider = validProviders.includes(currentConfig.provider)
+    ? currentConfig.provider
+    : APIProvider.PICWISH;
+
+  const [provider, setProvider] = useState<APIProvider>(safeProvider);
   const [picwishKey, setPicwishKey] = useState(currentConfig.provider === APIProvider.PICWISH ? currentConfig.apiKey : '');
   const [watermarkremoverKey, setWatermarkremoverKey] = useState(currentConfig.provider === APIProvider.WATERMARKREMOVER ? currentConfig.apiKey : '');
   const [segmindKey, setSegmindKey] = useState(currentConfig.provider === APIProvider.SEGMIND ? currentConfig.apiKey : '');
@@ -86,7 +93,7 @@ export const APISettings: React.FC<APISettingsProps> = ({ onConfigChange, curren
           </svg>
           <span className="font-medium">API 設置</span>
           <span className="text-sm text-slate-400">
-            (當前: {PROVIDER_INFO[currentConfig.provider].name})
+            (當前: {PROVIDER_INFO[safeProvider]?.name || 'PicWish'})
           </span>
         </div>
         <svg

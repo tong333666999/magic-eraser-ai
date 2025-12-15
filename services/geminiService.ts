@@ -4,21 +4,19 @@ import { GoogleGenAI } from "@google/genai";
  * Sends an image to Gemini to remove watermarks/text.
  * @param base64Image The base64 string of the image (without the data:image/xxx;base64, prefix if strictly raw, but the SDK handles data URIs mostly fine via inlineData helper or we strip it).
  * @param mimeType The mime type of the image.
- * @param apiKey The Gemini API key (optional, falls back to environment variable)
+ * @param apiKey The Gemini API key (required)
  */
 export const removeWatermark = async (
   base64Image: string,
   mimeType: string,
   apiKey?: string
 ): Promise<string> => {
-  // Use provided API key or fall back to environment variable
-  const key = apiKey || process.env.API_KEY;
-
-  if (!key) {
-    throw new Error("Gemini API key is required. Please provide it in the settings or set GEMINI_API_KEY environment variable.");
+  // API key is required
+  if (!apiKey) {
+    throw new Error("Gemini API key is required. Please provide it in the API settings.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: key });
+  const ai = new GoogleGenAI({ apiKey });
   try {
     // 1. Prepare the Prompt
     // We use a specific prompt to guide the model to perform "inpainting" or "cleanup".

@@ -26,10 +26,10 @@ export default function App() {
         // Fallback to default
       }
     }
-    // Default config - try to use environment variable
+    // Default config - user must enter their own API key
     return {
       provider: APIProvider.GEMINI,
-      apiKey: process.env.GEMINI_API_KEY || ''
+      apiKey: ''
     };
   });
 

@@ -8,13 +8,29 @@ interface ComparisonViewProps {
 export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalImage, processedImage }) => {
   const [showOriginal, setShowOriginal] = useState(false);
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = processedImage;
-    link.download = `cleaned-image-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    const fileName = `cleaned-image-${Date.now()}.png`;
+
+    try {
+      // Convert to blob first so Safari/iOS can handle the download
+      const response = await fetch(processedImage);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup to avoid memory leaks on repeated downloads
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed, opening image in a new tab.', error);
+      // Fallback for browsers that block programmatic downloads (common on mobile Safari)
+      window.open(processedImage, '_blank');
+    }
   };
 
   return (
@@ -59,6 +75,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalImage, p
           下載圖片
         </button>
       </div>
+
+      <p className="text-center text-xs text-slate-500">
+        若手機無法自動下載，請長按圖片另存或在新分頁開啟。
+      </p>
     </div>
   );
 };
